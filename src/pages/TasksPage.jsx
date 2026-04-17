@@ -165,16 +165,29 @@ export default function TasksPage() {
                         </select>
                       </td>
                       <td style={{ minWidth: 150 }}>
-                        {(isAdmin || task.assigned_to === profile?.id) ? (
+                        {/* Solo el colaborador asignado puede mover la barra. La administradora solo observa. */}
+                        {(!isAdmin && task.assigned_to === profile?.id) ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <input type="range" min="0" max="100" step="5" value={task.progress}
+                            <input 
+                              type="range" 
+                              min="0" 
+                              max="100" 
+                              step="5" 
+                              value={task.progress}
                               onChange={e => handleProgressChange(task.id, Number(e.target.value))}
-                              style={{ flex: 1, accentColor: 'var(--accent)' }} />
+                              style={{ flex: 1, accentColor: 'var(--accent)' }} 
+                            />
                             <span className="progress-text">{task.progress}%</span>
                           </div>
                         ) : (
+                          /* Vista para Administradora o tareas ajenas: Barra estática de solo lectura */
                           <div className="progress-wrap">
-                            <div className="progress-bar"><div className="progress-fill" style={{ width: `${task.progress}%` }} /></div>
+                            <div className="progress-bar">
+                              <div 
+                                className="progress-fill" 
+                                style={{ width: `${task.progress}%`, background: isAdmin ? 'var(--text-3)' : 'var(--accent)' }} 
+                              />
+                            </div>
                             <span className="progress-text">{task.progress}%</span>
                           </div>
                         )}
