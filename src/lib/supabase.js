@@ -22,11 +22,12 @@ export const updateProfile = (id, data) =>
 
 // ── Tasks ─────────────────────────────────────────────────────
 export const getTasks = () =>
-  supabase
-    .from('tasks')
+  supabase.from('tasks')
     .select(`
       *,
-      assigned:profiles!tasks_assigned_to_fkey(id, full_name, avatar_initials, color),
+      assignees:task_assignees(
+        profile:profiles(id, full_name, avatar_initials, color)
+      ),
       creator:profiles!tasks_created_by_fkey(id, full_name)
     `)
     .order('created_at', { ascending: false })
@@ -36,7 +37,9 @@ export const getTaskById = (id) =>
     .from('tasks')
     .select(`
       *,
-      assigned:profiles!tasks_assigned_to_fkey(*),
+      assignees:task_assignees(
+        profile:profiles(id, full_name, avatar_initials, color)
+      ),
       subtasks(*),
       comments(*, author:profiles(*))
     `)
@@ -118,3 +121,19 @@ export const markAllRead = (userId) =>
 // ── Analytics ─────────────────────────────────────────────────
 export const getUserTaskSummary = () =>
   supabase.from('user_task_summary').select('*')
+
+// ── Multi-assignees ───────────────────────────────────────────
+export const getTaskAssignees = (taskId) =>
+  supabase
+    .from('task_assignees')
+    .select('user_id, profile:profiles(id, full_name, avatar_initials, color)')
+    .eq('task_id', taskId)
+
+export const setTaskAssignees = async (taskId, userIds) => {
+  // Borra los actuales y reinserta — más simple que hacer diff
+  await supabase.from('task_assignees').delete().eq('task_id', taskId)
+  if (!userIds.length) return { error: null }
+  return supabase.from('task_assignees').insert(
+    userIds.map(user_id => ({ task_id: taskId, user_id }))
+  )
+}
