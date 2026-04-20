@@ -32,7 +32,10 @@ export default function TasksPage() {
   useEffect(() => { load() }, [])
 
   const filtered = useMemo(() => {
-    let list = isAdmin ? tasks : tasks.filter(t => t.assigned_to === profile?.id)
+    let list = isAdmin ? tasks : tasks.filter(t => 
+      t.assigned_to === profile?.id || 
+      t.assignees?.some(a => a.profile.id === profile?.id)
+    )
     if (search) list = list.filter(t => t.title.toLowerCase().includes(search.toLowerCase()))
     if (filterStatus) list = list.filter(t => t.status === filterStatus)
     if (filterPriority) list = list.filter(t => t.priority === filterPriority)
@@ -145,12 +148,31 @@ export default function TasksPage() {
                       <td><span className={`badge b-${task.priority}`}>{PRIORITY_LABELS[task.priority]}</span></td>
                       {isAdmin && (
                         <td>
-                          {task.assigned ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <div className={`avatar sm ${COLOR_MAP[task.assigned.color] || 'av-purple'}`}>{task.assigned.avatar_initials}</div>
-                              <span style={{ fontSize: 12 }}>{task.assigned.full_name}</span>
+                          {task.assignees?.length > 0 ? (
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              {task.assignees.slice(0, 3).map((a, i) => (
+                                <div
+                                  key={a.profile.id}
+                                  className={`avatar sm av-${a.profile.color}`}
+                                  title={a.profile.full_name}
+                                  style={{ 
+                                    marginLeft: i === 0 ? 0 : -8, 
+                                    border: '2px solid var(--bg-surface)', 
+                                    zIndex: 3 - i 
+                                  }}
+                                >
+                                  {a.profile.avatar_initials}
+                                </div>
+                              ))}
+                              {task.assignees.length > 3 && (
+                                <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 4 }}>
+                                  +{task.assignees.length - 3}
+                                </span>
+                              )}
                             </div>
-                          ) : <span className="text-muted">—</span>}
+                          ) : (
+                            <span style={{ color: 'var(--text-3)', fontSize: 12 }}>Sin asignar</span>
+                          )}
                         </td>
                       )}
                       <td>
