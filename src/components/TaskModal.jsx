@@ -231,7 +231,8 @@ export default function TaskModal({ task, onClose, onSaved }) {
 
           {/* Avance */}
           <Field label={`Avance: ${form.progress}%`}>
-            {!isAdmin ? (
+            {/* Se habilita si el usuario está entre los seleccionados (admin o colab) */}
+            {(selectedUsers.includes(profile?.id)) ? (
               <input
                 type="range" min="0" max="100" step="5"
                 value={form.progress} onChange={e => set('progress', e.target.value)}
@@ -243,7 +244,9 @@ export default function TaskModal({ task, onClose, onSaved }) {
                   <div className="progress-fill" style={{ width:`${form.progress}%` }}/>
                 </div>
                 <div style={{ fontSize:11, color:'var(--text-3)', marginTop:6 }}>
-                  El colaborador asignado actualiza el progreso.
+                  {isAdmin 
+                    ? "Solo los colaboradores asignados pueden actualizar el progreso." 
+                    : "No estás asignado a esta tarea."}
                 </div>
               </div>
             )}

@@ -187,8 +187,8 @@ export default function TasksPage() {
                         </select>
                       </td>
                       <td style={{ minWidth: 150 }}>
-                        {/* Solo el colaborador asignado puede mover la barra. La administradora solo observa. */}
-                        {(!isAdmin && task.assigned_to === profile?.id) ? (
+                        {/* Permitir si es su propia tarea (sea admin o colab) */}
+                        {(task.assigned_to === profile?.id || task.assignees?.some(a => a.profile.id === profile?.id)) ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <input 
                               type="range" 
@@ -202,12 +202,12 @@ export default function TasksPage() {
                             <span className="progress-text">{task.progress}%</span>
                           </div>
                         ) : (
-                          /* Vista para Administradora o tareas ajenas: Barra estática de solo lectura */
+                          /* Vista de solo lectura para tareas ajenas */
                           <div className="progress-wrap">
                             <div className="progress-bar">
                               <div 
                                 className="progress-fill" 
-                                style={{ width: `${task.progress}%`, background: isAdmin ? 'var(--text-3)' : 'var(--accent)' }} 
+                                style={{ width: `${task.progress}%`, background: 'var(--text-3)' }} 
                               />
                             </div>
                             <span className="progress-text">{task.progress}%</span>
