@@ -181,7 +181,8 @@ export default function TasksPage() {
                           style={{ fontSize: 11, padding: '3px 6px', width: 'auto' }}
                           value={task.status}
                           onChange={e => handleStatusChange(task.id, e.target.value)}
-                          disabled={!isAdmin && task.assigned_to !== profile?.id}
+                          /* Permiso corregido para asignados múltiples */
+                          disabled={!isAdmin && !(task.assigned_to === profile?.id || task.assignees?.some(a => a.profile.id === profile?.id))}
                         >
                           {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                         </select>
@@ -220,7 +221,8 @@ export default function TasksPage() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
-                          {(isAdmin || task.assigned_to === profile?.id) && (
+                          {/* Condición corregida para permitir editar a cualquier asignado */}
+                          {(isAdmin || task.assigned_to === profile?.id || task.assignees?.some(a => a.profile.id === profile?.id)) && (
                             <button className="btn btn-icon btn-sm" title="Editar" onClick={() => { setEditTask(task); setShowModal(true) }}>
                               <Edit2 size={13} />
                             </button>
